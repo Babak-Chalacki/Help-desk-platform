@@ -1,15 +1,13 @@
 <script setup>
-import { Link } from '@inertiajs/vue3'
+import { computed } from 'vue'
+import { Link, usePage } from '@inertiajs/vue3'
 import LogoMark from '@/Components/Landing/Partials/LogoMark.vue'
+import ThemeToggle from '@/Components/Landing/Partials/ThemeToggle.vue'
 
-defineProps({
-    theme: {
-        type: String,
-        default: 'light',
-    },
-})
+const page = usePage()
 
-defineEmits(['toggle-theme'])
+// Shared by Laravel through HandleInertiaRequests: auth.user is null for guests
+const user = computed(() => page.props.auth?.user ?? null)
 </script>
 
 <template>
@@ -31,38 +29,40 @@ defineEmits(['toggle-theme'])
             </div>
 
             <div class="flex items-center gap-3">
+                <ThemeToggle />
 
-                <!-- THEME TOGGLE -->
-                <button
-                    @click="$emit('toggle-theme')"
-                    type="button"
-                    aria-label="Toggle theme"
-                    class="rounded-xl border border-slate-200 p-2.5 text-slate-600 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
-                >
-                    <!-- Moon (shown in light mode) -->
-                    <svg v-if="theme === 'light'" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
-                    </svg>
-
-                    <!-- Sun (shown in dark mode) -->
-                    <svg v-else class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364-.707.707M6.343 17.657l-.707.707m12.728 0-.707-.707M6.343 6.343l-.707-.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
-                    </svg>
-                </button>
-
+                <!-- Logged in -->
                 <Link
-                    href="/login"
-                    class="hidden rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800 sm:block"
-                >
-                    Sign in
-                </Link>
-
-                <Link
-                    href="/register"
+                    v-if="user"
+                    href="/dashboard"
                     class="rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-600/20 transition hover:bg-indigo-700"
                 >
-                    Get started
+                    Dashboard
                 </Link>
+
+                <Link
+                    v-if="user"
+                    href="/logout"
+                    class="rounded-xl bg-red-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-red-600/20 transition hover:bg-red-700"                >
+                    Logout
+                </Link>
+
+                <!-- Guest -->
+                <template v-else>
+                    <Link
+                        href="/login"
+                        class="hidden rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800 sm:block"
+                    >
+                        Sign in
+                    </Link>
+
+                    <Link
+                        href="/register"
+                        class="rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-600/20 transition hover:bg-indigo-700"
+                    >
+                        Sign up
+                    </Link>
+                </template>
             </div>
         </nav>
     </header>
